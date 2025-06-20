@@ -6,7 +6,8 @@ dotenv.config();
 
 export const client = new MongoClient(process.env.CONNECTION_STRING || "mongodb://localhost:27017");
 export const researchersCollection : Collection<Researcher> = client.db("InhaalEx").collection<Researcher>("researchers");
-
+export const speciesCollection : Collection<Species> = client.db("InhaalEx").collection<Species>("species");
+export const penguinsCollection : Collection<Penguin> = client.db("InhaalEx").collection<Penguin>("penguins")
 export const SALT_ROUNDS = 10;
 
 async function exit() {
@@ -24,7 +25,7 @@ export async function getAllResearchers(): Promise<Researcher[]> {
 }
 
 export async function getAllSpecies(): Promise<Species[]> {
-    return [];
+    return await speciesCollection.find({}).toArray();
 }
 
 export async function getSpeciesById(id: string): Promise<Species | null> {
@@ -40,7 +41,9 @@ export async function assignPenguinToResearcher(penguinId: number, researcherStr
 };
 
 export async function getAllPenguins(sortField: string, sortDirection: SortDirection, q: string): Promise<Penguin[]> {
-    return [];
+    const filther = q ? {name: {$regex : q, $options: "i" }}: {};
+    const sort:Record<string, SortDirection> = {[sortField]: sortDirection}
+    return await penguinsCollection.find(filther).sort(sort).toArray();
 }
 
 export async function getPenguinsBySpecies(id: number): Promise<Penguin[]> {
@@ -59,19 +62,51 @@ async function seedResearchers(): Promise<void> {
         const researchers : Researcher[] = await response.json();
         
         for (const r of researchers) {
-            r.pincode = await bcrypt.hash(r.pincode, SALT_ROUNDS)
+            r.pincode = await bcrypt.hash(r.pincode, SALT_ROUNDS);
         }
 
         await researchersCollection.insertMany(researchers);
-        } 
-    console.log(`Seeded ${researchers.length} researchers`)
+        console.log(`Seeded ${researchers.length} researchers`)
+        } else {
+            console.log("database already contains researchers")
+        }
+    
+    
 }
 
 async function seedSpecies(): Promise<void> {
-   
+    const species : Species[] = await getAllSpecies();
+        if (species.length == 0) {
+        console.log("Database is empty, loading species from API")
+        const response = await fetch("https://raw.githubusercontent.com/similonap/json/refs/heads/master/penguins/species.json");
+        const species : Species[] = await response.json();
+        
+        await speciesCollection.insertMany(species);
+        console.log(`Seeded ${species.length} species`)
+        } else {
+            console.log("database already contains species")
+        }
+
 }
 
 async function seedPenguins(): Promise<void> {
+    const penguins = await penguinsCollection.find({}).toArray();
+
+    if (penguins.length == 0) {
+        console.log("No Pengus, Loading from API")
+        const response = await fetch("https://raw.githubusercontent.com/similonap/json/refs/heads/master/penguins/penguins.json")
+        const penguins : Penguin[] = await response.json();
+        const species = await getAllSpecies();
+
+        for (const pengu of penguins) {
+            let result = await client.db("InhaalEx").collection<Species>("species").findOne<Species>({id: pengu.species_id});
+            console.log(result)
+        }
+        await penguinsCollection.insertMany(penguins);
+        console.log(`Seeded ${penguins.length} penguins`)
+    } else {
+        console.log("penguins alr in database")
+    }
     
 }
 

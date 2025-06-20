@@ -46,20 +46,32 @@
     </tr>
   </thead>
   <tbody>
+
+    <% for(let pengu of penguins) { %>
     <tr>
-      <td><img src="https://raw.githubusercontent.com/similonap/json/refs/heads/master/penguins/images/1747835243822-pe875j.jpg" width="100"></td>
-      <td>1</td>
-      <td>Pip</td>
-      <td>A playful young penguin fond of swimming.</td>
-      <td><a href="/species/1">Royal Penguin</a></td>
-      <td>Macquarie Island</td>
-      <td>Female</td>
-      <td>12.5 kg</td>
-      <td>65 cm</td>
-      <td>2019</td>
-      <td>6y</td>
-      <td>emilygreen</td>
+      <td><img src="<%= pengu.image %>" width="100"></td>
+      <td><%= pengu.id %></td>
+      <td><%= pengu.nickname %></td>
+      <td><%= pengu.description %></td>
+      <td><a href="/species/1"><%= pengu.species_id %></a></td>
+      <td><%= pengu.island %></td>
+      <td><%= pengu.gender %></td>
+      <td><%= pengu.weight %></td>
+      <td><%= pengu.height %></td>
+      <td><%= pengu.year %></td>
+      <td><%= calculatePenguinAge(pengu.year) %></td>
+      <td><% if (pengu.assign_to) { %>
+        <%= pengu.assigned_to %>
+        <% } else { %>
+          <form method="post" action="/penguins/3/assign">
+          <button type="submit">Assign to me</button>
+          </form>
+        <% } %>
+
+      </td>
+
     </tr>
+    <% } %>
     <tr>
       <td><img src="https://raw.githubusercontent.com/similonap/json/refs/heads/master/penguins/images/1747835243822-v8ak7d.jpg" width="100"></td>
       <td>2</td>
