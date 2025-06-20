@@ -1,1 +1,2 @@
 # InhaalEx_Juni
+mongodb+srv://estalistrinev:tPqvaqEIdP7z9KM1@mijnproject.udzcq5y.mongodb.net/?retryWrites=true&w=majority&appName=mijnProject
