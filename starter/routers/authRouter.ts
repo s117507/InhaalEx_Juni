@@ -1,5 +1,6 @@
 import e, { Router } from "express";
-import { getAllResearchers } from "../database";
+import { getAllResearchers, login } from "../database";
+import { Researcher } from "../types";
 
 export function authRouter() {
     const router = Router();
@@ -14,6 +15,16 @@ export function authRouter() {
     });
 
     router.post("/login", async(req, res) => {
+        const username : string = req.body.username;
+        const pincode : string = req.body.pincode;
+
+       /*try {
+            let researcher : Researcher = await login(username, pincode);
+            delete researcher.pincode;
+            req.session.user = s;
+        }
+*/
+
         res.redirect("/login");
     });
 
