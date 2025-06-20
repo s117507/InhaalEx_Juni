@@ -29,7 +29,8 @@ export async function getAllSpecies(): Promise<Species[]> {
 }
 
 export async function getSpeciesById(id: string): Promise<Species | null> {
-    return null;
+    let result : Species | any = await client.db("InhaalEx").collection("species").findOne<Species>({id: id});
+    return result;
 }
 
 export async function updateResearcher(username: string, newPincode: string): Promise<void> {
@@ -47,7 +48,8 @@ export async function getAllPenguins(sortField: string, sortDirection: SortDirec
 }
 
 export async function getPenguinsBySpecies(id: number): Promise<Penguin[]> {
-    return [];
+    let result : Penguin | null = await client.db("InhaalEx").collection("penguins").findOne<Penguin>({id: id});
+    return await penguinsCollection.find({species_id: result?.species_id}).toArray();
 }
 
 export async function login(username: string, pincode: string): Promise<Researcher | null> {
@@ -99,8 +101,9 @@ async function seedPenguins(): Promise<void> {
         const species = await getAllSpecies();
 
         for (const pengu of penguins) {
-            let result = await client.db("InhaalEx").collection<Species>("species").findOne<Species>({id: pengu.species_id});
+            let result : Species | any = await client.db("InhaalEx").collection<Species>("species").findOne<Species>({id: pengu.species_id});
             console.log(result)
+            pengu.species = result;
         }
         await penguinsCollection.insertMany(penguins);
         console.log(`Seeded ${penguins.length} penguins`)

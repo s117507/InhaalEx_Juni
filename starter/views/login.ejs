@@ -6,10 +6,9 @@
         <div class="form-group">
             <label for="username" class="form-label">Select your username</label>
             <select name="username" id="username" class="form-select">
-                    <option value="alexbio">alexbio</option>
-                    <option value="jordanlee">jordanlee</option>
-                    <option value="carlossmith">carlossmith</option>
-                    <option value="emilygreen">emilygreen</option>  
+                    <% for(let scientist of researchers) { %>
+                    <option value=<%= scientist.fullname %>><%= scientist.fullname %></option>
+                    <% } %>
             </select>
         </div>
         <div class="form-group">
