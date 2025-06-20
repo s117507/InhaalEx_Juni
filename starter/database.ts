@@ -1,9 +1,11 @@
 import { Collection, MongoClient, SortDirection } from "mongodb";
 import dotenv from "dotenv";
 import { Penguin, Researcher, Species } from "./types";
+import bcrypt from 'bcrypt';
 dotenv.config();
 
 export const client = new MongoClient(process.env.CONNECTION_STRING || "mongodb://localhost:27017");
+export const researchersCollection : Collection<Researcher> = client.db("InhaalEx").collection<Researcher>("researchers");
 
 export const SALT_ROUNDS = 10;
 
@@ -18,7 +20,7 @@ async function exit() {
 }
 
 export async function getAllResearchers(): Promise<Researcher[]> {
-    return [];
+    return await researchersCollection.find({}).toArray();
 }
 
 export async function getAllSpecies(): Promise<Species[]> {
@@ -50,7 +52,19 @@ export async function login(username: string, pincode: string): Promise<Research
 }
 
 async function seedResearchers(): Promise<void> {
-   
+    const researchers : Researcher[] = await getAllResearchers();
+        if (researchers.length == 0) {
+        console.log("Database is empty, loading researchers from API")
+        const response = await fetch("https://raw.githubusercontent.com/similonap/json/refs/heads/master/penguins/researchers.json");
+        const researchers : Researcher[] = await response.json();
+        
+        for (const r of researchers) {
+            r.pincode = await bcrypt.hash(r.pincode, SALT_ROUNDS)
+        }
+
+        await researchersCollection.insertMany(researchers);
+        } 
+    console.log(`Seeded ${researchers.length} researchers`)
 }
 
 async function seedSpecies(): Promise<void> {
